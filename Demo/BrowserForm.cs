@@ -24,11 +24,15 @@ namespace Demo
         {
             InitializeComponent();
             
-            var setting = new CefSettings();
-            setting.Locale = "zh-CN";
-            setting.UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
-
-            CefSharp.Cef.Initialize(setting, true);
+           
+            if (!CefSharp.Cef.IsInitialized)
+            {
+                var setting = new CefSettings();
+                setting.Locale = "zh-CN";
+                setting.UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
+                CefSharp.Cef.Initialize(setting, true);
+            }
+            
             //chromeBrowser.FrameLoadEnd += FrameLoadEnd_GetSource;
 
         }

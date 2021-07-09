@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,14 +23,21 @@ namespace Demo
         /// </summary>
         private CancellationTokenSource TaskSource = new CancellationTokenSource();
 
+        /// <summary>
+        /// 关注列表数据
+        /// </summary>
+        private DataTable DTFollow;
 
         public MainForm()
         {
             InitializeComponent();
             browserForm = new BrowserForm();
             
-        }
+            //  绑定关注列表数据源
+            DTFollow = new DataTable();
+            BindDgvFollow(DTFollow);
 
+        }
         private void button2_Click(object sender, EventArgs e)
         {
             string res = HttpHelper.SendDataByGET("https://www.szwego.com/service/mp/pc_login_operation.jsp?act=get_param&_=" + DateTime.Now.ToString("yyyyMMdd"));
@@ -43,14 +51,17 @@ namespace Demo
             string url = string.Format(@"https://open.weixin.qq.com/connect/qrconnect?appid={0}&redirect_uri={1}&state={2}&scope=snsapi_login&login_type=jssdk&self_redirect=default&styletype=&sizetype=&bgcolor=&rst=&style=white",
                 operationBody["appid"].ToString(), operationBody["redirect_uri"].ToString(), operationBody["state"].ToString());
             Console.WriteLine(url);
-            browserForm.Show();
+            ShowHideBrowser(true);
             browserForm.chromeBrowser.Load(url);
             //  启动线程
             Task.Run(() => Logined(url), TaskSource.Token);
         }
 
 
-
+        /// <summary>
+        /// 登陆后的方法
+        /// </summary>
+        /// <param name="url"></param>
         private void Logined(string url)
         {
             do
@@ -64,9 +75,10 @@ namespace Demo
                 Thread.Sleep(500);
                 Console.WriteLine("等待页面加载完成");
             }
-
             Console.WriteLine("扫码完成");
             Console.WriteLine("当前Cookie：" + browserForm.cookies);
+            //
+            ShowHideBrowser(false);
             //  登陆完成后信息处理   
             Task.Run(() => GetUserInfo(),TaskSource.Token);
             Task.Run(() => GetAlbum(), TaskSource.Token);
@@ -103,9 +115,7 @@ namespace Demo
         private void GetAlbum()
         { 
             int page = 1;
-            int residue = 1;
-            List<JToken> AllShopList = new List<JToken>();
-            //browserForm.chromeBrowser.Hide();
+            int residue = 1;        
             do
             {
                 string url = "https://www.szwego.com/service/album/get_album_list.jsp?act=attention&search_value=&page_index=" + page.ToString() + "&tag_id=&_=" + get_milliseconds().ToString();
@@ -117,14 +127,28 @@ namespace Demo
                     if(int.Parse(result["errcode"].ToString()) == 0)
                     {
                         residue = int.Parse(result["total_page"].ToString()) - page;
-                        foreach(var shop_info in result["result"]["shop_list"])
+                        DataRow newRow;
+                        foreach (var shop_info in result["result"]["shop_list"])
                         {
                             if (bool.Parse(shop_info["is_my_album"].ToString()))
                             {
                                 continue;
                             }
-                            AllShopList.Add(shop_info);
-                            Console.WriteLine(shop_info["shop_id"].ToString() + " --- " +shop_info["shop_name"].ToString());
+                              //  绑定数据
+                            newRow = DTFollow.NewRow();
+                            //foreach (DataColumn col in DTFollow.Columns) 
+                            //{
+                            //    dr[col.ToString()] = shop_info[col.ToString()].ToString();
+                            //    Console.WriteLine(col.ToString() + "------" + shop_info[col.ToString()].ToString());
+                            //}
+                            newRow["店铺ID"] = shop_info["shop_id"].ToString();
+                            newRow["店铺名称"] = shop_info["shop_name"].ToString();
+                            newRow["是否VIP"] = shop_info["is_vip"].ToString();
+                            newRow["总商品数"] = shop_info["total_goods"].ToString();
+                            newRow["上新商品"] = shop_info["new_goods"].ToString();
+                            Console.WriteLine(shop_info["new_goods"].ToString());
+
+                            DTFollow.Rows.Add(newRow);
                         }
                     }
                     else
@@ -136,7 +160,10 @@ namespace Demo
                 page++;
                 Thread.Sleep(500);
             } while (residue > 0);
-            Console.WriteLine("获取关注列表完成，一共：" + AllShopList.Count + " 个 ");
+            BindDgvFollow(DTFollow);
+            Console.WriteLine("获取关注列表完成，一共：" + DTFollow.Rows.Count + " 个 ");
+
+            
         }
 
         private void GetPersonalList(string albumId)
@@ -211,6 +238,56 @@ namespace Demo
             }
         }
 
+        private delegate void ShowHideBrowserDelegate(bool Show);
+        private void ShowHideBrowser(bool Show = false)
+        {
+            if (browserForm.InvokeRequired)
+            {
+                browserForm.Invoke(new ShowHideBrowserDelegate(ShowHideBrowser),Show);
+            }
+            else
+            {
+                if (browserForm.IsDisposed)
+                {
+                    browserForm = new BrowserForm();
+                }
+                if (Show)
+                {
+                    browserForm.Show();
+                    browserForm.Visible = true;
+                }
+                else
+                {
+                    browserForm.Hide();
+                    browserForm.Visible = false;
+                }
+            }
+        }
+
+        private delegate void BindDgvFollowDelegate(DataTable dt);
+
+        private void BindDgvFollow(DataTable dt)
+        {
+            if (dgv_follows.InvokeRequired)
+            {
+                Console.WriteLine("BindDgvFollow");
+                dgv_follows.Invoke(new BindDgvFollowDelegate(BindDgvFollow),dt);
+            }
+            else
+            {
+                if (!dt.Columns.Contains("店铺ID"))
+                {
+                    dt.Columns.Add("店铺ID", Type.GetType("System.String"));
+                    dt.Columns.Add("店铺名称", Type.GetType("System.String"));
+                    dt.Columns.Add("是否VIP", Type.GetType("System.String"));
+                    dt.Columns.Add("总商品数", Type.GetType("System.String"));
+                    dt.Columns.Add("上新商品", Type.GetType("System.String"));
+                }
+                dgv_follows.DataSource = null;
+                dgv_follows.DataSource = dt;
+                //dgv_follows.AutoGenerateColumns = true;
+            }
+        }
         #endregion
 
         #region 获取毫秒
