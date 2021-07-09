@@ -33,12 +33,6 @@ namespace Demo
 
         }
 
-        //async void FrameLoadEnd_GetSource(object sender, FrameLoadEndEventArgs e)
-        //{
-
-        //    Console.WriteLine("当前获取源码的url:"+e.Url);
-        //    source = await chromeBrowser.GetSourceAsync();
-        //}
 
         private void chromeBrowser_FrameLoadEnd(object sender, CefSharp.FrameLoadEndEventArgs e)
         {
