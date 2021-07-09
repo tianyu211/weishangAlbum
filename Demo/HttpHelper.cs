@@ -21,7 +21,7 @@ namespace Demo
         public static string SendDataByGET(string Url, string postDataStr = "", CookieContainer cookie = null)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url + (postDataStr == "" ? "" : "?") + postDataStr);
-            if (cookie.Count == 0)
+            if (cookie == null || cookie.Count == 0)
             {
                 request.CookieContainer = new CookieContainer();
             }

@@ -1,12 +1,8 @@
-﻿using CefSharp.WinForms;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Text;
+using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -39,7 +35,7 @@ namespace Demo
             string res = HttpHelper.SendDataByGET("https://www.szwego.com/service/mp/pc_login_operation.jsp?act=get_param&_=" + DateTime.Now.ToString("yyyyMMdd"));
             if (res == null)
             {
-                MessageBox.Show("你的网络可能不太好，请换个环境再试试吧。");
+                ErrorMsg("你的网络可能不太好，请换个环境再试试吧。");
                 return;
             }
             var result = (JObject)JsonConvert.DeserializeObject(res);
@@ -52,6 +48,7 @@ namespace Demo
             //  启动线程
             Task.Run(() => Logined(url), TaskSource.Token);
         }
+
 
 
         private void Logined(string url)
@@ -70,7 +67,7 @@ namespace Demo
 
             Console.WriteLine("扫码完成");
             Console.WriteLine("当前Cookie：" + browserForm.cookies);
-            
+            //  登陆完成后信息处理   
             Task.Run(() => GetUserInfo(),TaskSource.Token);
             Task.Run(() => GetAlbum(), TaskSource.Token);
         }
@@ -80,8 +77,24 @@ namespace Demo
         /// </summary>
         private void GetUserInfo()
         {
-            //string InfoUrl = "https://www.szwego.com/service/account/get_user_system_status.jsp?&_=" + get_milliseconds().ToString();
-            //string res = HttpHelper.SendDataByGET(InfoUrl,"",browserForm.cookieContainer);
+            string InfoUrl = "https://www.szwego.com/service/account/get_user_system_status.jsp?&_=" + get_milliseconds().ToString();
+            string res = HttpHelper.SendDataByGET(InfoUrl, "", browserForm.cookieContainer);
+            if (res == null)
+            {
+                ErrorMsg("网络异常");
+                return;
+            }
+            var result = (JObject)JsonConvert.DeserializeObject(res);
+            if (int.Parse(result["errcode"].ToString()) != 0)
+            {
+                ErrorMsg(result["errmsg"].ToString());
+                return;
+            }
+            DisplayName(result["result"]["user"]["user_name"].ToString());
+            DisplayAvatar(result["result"]["user"]["user_icon"].ToString());
+            DisplayBackground(result["result"]["user"]["user_baner_img"].ToString());
+            DisplayShopID(result["result"]["user"]["shop_id"].ToString());
+            DisplayShopName(result["result"]["user"]["shop_name"].ToString());
         }
 
         /// <summary>
@@ -89,7 +102,6 @@ namespace Demo
         /// </summary>
         private void GetAlbum()
         { 
-
             int page = 1;
             int residue = 1;
             List<JToken> AllShopList = new List<JToken>();
@@ -117,7 +129,7 @@ namespace Demo
                     }
                     else
                     {
-                        MessageBox.Show(result["errmsg"].ToString());
+                        ErrorMsg(result["errmsg"].ToString());
                         return;
                     }
                 }
@@ -132,6 +144,76 @@ namespace Demo
 
         }
 
+
+        #region 控件代理
+        private delegate void DisplayNameDelegate(string name);
+        private void DisplayName(string name)
+        {
+            if (this.lbl_uname.InvokeRequired)
+            {
+                this.lbl_uname.Invoke(new DisplayNameDelegate(DisplayName), name);
+            }
+            else
+            {
+                lbl_uname.Text = name;
+            }
+        }
+
+        private delegate void DisplayAvatarDelegate(string avatar);
+        private void DisplayAvatar(string avatar)
+        {
+            if (this.pic_avatar.InvokeRequired)
+            {
+                this.pic_avatar.Invoke(new DisplayNameDelegate(DisplayAvatar), avatar);
+            }
+            else
+            {
+                pic_avatar.Image = Image.FromStream(System.Net.WebRequest.Create(@avatar).GetResponse().GetResponseStream());
+            }
+        }
+
+        private delegate void DisplayBackgroundDelegate(string banner);
+        private void DisplayBackground(string banner)
+        {
+            if (this.grb_user.InvokeRequired)
+            {
+                this.grb_user.Invoke(new DisplayBackgroundDelegate(DisplayBackground), banner);
+            }
+            else
+            {
+                grb_user.BackgroundImage = Image.FromStream(System.Net.WebRequest.Create(@banner).GetResponse().GetResponseStream());
+            }
+        }
+
+        private delegate void DisplayShopIDDelegate(string shopid);
+        private void DisplayShopID(string shopid)
+        {
+            if (this.lbl_shop_id.InvokeRequired)
+            {
+                this.lbl_shop_id.Invoke(new DisplayShopIDDelegate(DisplayShopID), shopid);
+            }
+            else
+            {
+                lbl_shop_id.Text = shopid;
+            }
+        }
+
+        private delegate void DisplayShopNameDelegate(string shopid);
+        private void DisplayShopName(string shopid)
+        {
+            if (this.lbl_shop_name.InvokeRequired)
+            {
+                this.lbl_shop_name.Invoke(new DisplayShopNameDelegate(DisplayShopName), shopid);
+            }
+            else
+            {
+                lbl_shop_name.Text = shopid;
+            }
+        }
+
+        #endregion
+
+        #region 获取毫秒
         /// <summary>
         /// 获取毫秒
         /// </summary>
@@ -152,12 +234,15 @@ namespace Demo
             DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1)); // 当地时区
             return (long)(dateTime - startTime).TotalMilliseconds; // 相差毫秒秒数
         }
+        #endregion
 
+        #region 窗体事件
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             try
             {
-
+                Console.WriteLine("主窗体关闭，关闭所有Task");
+                browserForm.Close();
                 TaskSource.Cancel();
                 TaskSource.Dispose();
             }catch(Exception ex)
@@ -165,5 +250,12 @@ namespace Demo
                 Console.WriteLine("关闭Task失败：" + ex.Message);
             }
         }
+
+        private void ErrorMsg(string msg)
+        {
+            throw new Exception(msg);
+            //MessageBox.Show(msg);
+        }
+        #endregion
     }
 }
