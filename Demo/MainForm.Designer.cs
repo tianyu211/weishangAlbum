@@ -69,7 +69,7 @@
             this.grb_follow.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.grb_follow.Name = "grb_follow";
             this.grb_follow.Padding = new System.Windows.Forms.Padding(2, 4, 2, 4);
-            this.grb_follow.Size = new System.Drawing.Size(1095, 586);
+            this.grb_follow.Size = new System.Drawing.Size(1112, 591);
             this.grb_follow.TabIndex = 3;
             this.grb_follow.TabStop = false;
             this.grb_follow.Text = "关注用户";
@@ -89,8 +89,9 @@
             this.dgv_follows.RowsDefaultCellStyle = dataGridViewCellStyle1;
             this.dgv_follows.RowTemplate.DefaultCellStyle.Font = new System.Drawing.Font("微软雅黑", 7.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.dgv_follows.RowTemplate.Height = 37;
-            this.dgv_follows.Size = new System.Drawing.Size(1052, 525);
+            this.dgv_follows.Size = new System.Drawing.Size(1104, 547);
             this.dgv_follows.TabIndex = 0;
+            this.dgv_follows.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_follows_CellContentClick);
             // 
             // grb_user
             // 

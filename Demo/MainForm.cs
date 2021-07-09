@@ -166,11 +166,6 @@ namespace Demo
             
         }
 
-        private void GetPersonalList(string albumId)
-        {
-
-        }
-
 
         #region 控件代理
         private delegate void DisplayNameDelegate(string name);
@@ -333,6 +328,30 @@ namespace Demo
             throw new Exception(msg);
             //MessageBox.Show(msg);
         }
-        #endregion
-    }
+
+        private ShopForm shopForm;
+        //  双击事件
+        private void dgv_follows_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            
+            //判断双击的是否为标题
+            if (e.RowIndex >= 0)
+            {
+                
+                string sel_shop_id = dgv_follows.CurrentRow.Cells["店铺ID"].Value.ToString();
+                Console.WriteLine("店铺ID："+ sel_shop_id);
+                if (shopForm != null && !shopForm.IsDisposed)
+                {
+                    shopForm.Dispose();
+                }
+                shopForm = new ShopForm(sel_shop_id, browserForm.cookieContainer);
+                shopForm.Show();
+            }
+            
+        }
+
+            #endregion
+
+
+        }
 }
