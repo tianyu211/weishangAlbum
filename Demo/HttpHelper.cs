@@ -18,7 +18,7 @@ namespace Demo
         /// <param name="postDataStr">GET数据</param>
         /// <param name="cookie">GET容器</param>
         /// <returns></returns>
-        public static string SendDataByGET(string Url, string postDataStr, CookieContainer cookie)
+        public static string SendDataByGET(string Url, string postDataStr = "", CookieContainer cookie = null)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url + (postDataStr == "" ? "" : "?") + postDataStr);
             if (cookie.Count == 0)

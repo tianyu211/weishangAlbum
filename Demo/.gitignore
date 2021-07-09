@@ -1,0 +1,7 @@
+﻿.vs
+.DS_Store
+bin/
+obj/
+Debug/
+Release/
+*.log

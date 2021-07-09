@@ -13,7 +13,7 @@ using System.Windows.Forms;
 
 namespace Demo
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
 
         /// <summary>
@@ -22,12 +22,12 @@ namespace Demo
         public BrowserForm browserForm;
 
         /// <summary>
-        /// 后台采集主线程
+        /// 窗体关闭时候统一关闭线程
         /// </summary>
-        private Task TaskBackground;
+        private CancellationTokenSource TaskSource = new CancellationTokenSource();
 
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             browserForm = new BrowserForm();
@@ -36,7 +36,7 @@ namespace Demo
 
         private void button2_Click(object sender, EventArgs e)
         {
-            string res = GetHttpResponse("https://www.szwego.com/service/mp/pc_login_operation.jsp?act=get_param&_=" + DateTime.Now.ToString("yyyyMMdd"));
+            string res = HttpHelper.SendDataByGET("https://www.szwego.com/service/mp/pc_login_operation.jsp?act=get_param&_=" + DateTime.Now.ToString("yyyyMMdd"));
             if (res == null)
             {
                 MessageBox.Show("你的网络可能不太好，请换个环境再试试吧。");
@@ -50,8 +50,7 @@ namespace Demo
             browserForm.Show();
             browserForm.chromeBrowser.Load(url);
             //  启动线程
-            TaskBackground = new Task(() => Logined(url));
-            TaskBackground.Start();
+            Task.Run(() => Logined(url), TaskSource.Token);
         }
 
 
@@ -71,9 +70,14 @@ namespace Demo
 
             Console.WriteLine("扫码完成");
             Console.WriteLine("当前Cookie：" + browserForm.cookies);
-            GetAlbum();
+            
+            Task.Run(() => GetUserInfo(),TaskSource.Token);
+            Task.Run(() => GetAlbum(), TaskSource.Token);
         }
 
+        /// <summary>
+        /// 获取用户信息
+        /// </summary>
         private void GetUserInfo()
         {
             //string InfoUrl = "https://www.szwego.com/service/account/get_user_system_status.jsp?&_=" + get_milliseconds().ToString();
@@ -107,7 +111,6 @@ namespace Demo
                             {
                                 continue;
                             }
-
                             AllShopList.Add(shop_info);
                             Console.WriteLine(shop_info["shop_id"].ToString() + " --- " +shop_info["shop_name"].ToString());
                         }
@@ -129,7 +132,10 @@ namespace Demo
 
         }
 
-
+        /// <summary>
+        /// 获取毫秒
+        /// </summary>
+        /// <returns></returns>
         private long get_milliseconds()
         {
             DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1)); // 当地时区
@@ -147,5 +153,17 @@ namespace Demo
             return (long)(dateTime - startTime).TotalMilliseconds; // 相差毫秒秒数
         }
 
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            try
+            {
+
+                TaskSource.Cancel();
+                TaskSource.Dispose();
+            }catch(Exception ex)
+            {
+                Console.WriteLine("关闭Task失败：" + ex.Message);
+            }
+        }
     }
 }

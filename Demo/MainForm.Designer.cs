@@ -1,6 +1,6 @@
 ﻿namespace Demo
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -31,10 +31,10 @@
             this.button2 = new System.Windows.Forms.Button();
             this.grb_follow = new System.Windows.Forms.GroupBox();
             this.grb_user = new System.Windows.Forms.GroupBox();
-            this.lbl_nick1 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.lbl_uname = new System.Windows.Forms.Label();
             this.pic_avatar = new System.Windows.Forms.PictureBox();
+            this.lbl_uname = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.lbl_nick1 = new System.Windows.Forms.Label();
             this.grb_user.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pic_avatar)).BeginInit();
             this.SuspendLayout();
@@ -71,14 +71,21 @@
             this.grb_user.TabStop = false;
             this.grb_user.Text = "用户信息";
             // 
-            // lbl_nick1
+            // pic_avatar
             // 
-            this.lbl_nick1.AutoSize = true;
-            this.lbl_nick1.Location = new System.Drawing.Point(30, 53);
-            this.lbl_nick1.Name = "lbl_nick1";
-            this.lbl_nick1.Size = new System.Drawing.Size(130, 24);
-            this.lbl_nick1.TabIndex = 0;
-            this.lbl_nick1.Text = "用户昵称：";
+            this.pic_avatar.Location = new System.Drawing.Point(451, 27);
+            this.pic_avatar.Name = "pic_avatar";
+            this.pic_avatar.Size = new System.Drawing.Size(95, 80);
+            this.pic_avatar.TabIndex = 3;
+            this.pic_avatar.TabStop = false;
+            // 
+            // lbl_uname
+            // 
+            this.lbl_uname.AutoSize = true;
+            this.lbl_uname.Location = new System.Drawing.Point(166, 53);
+            this.lbl_uname.Name = "lbl_uname";
+            this.lbl_uname.Size = new System.Drawing.Size(0, 24);
+            this.lbl_uname.TabIndex = 2;
             // 
             // label1
             // 
@@ -89,23 +96,16 @@
             this.label1.TabIndex = 1;
             this.label1.Text = "头像：";
             // 
-            // lbl_uname
+            // lbl_nick1
             // 
-            this.lbl_uname.AutoSize = true;
-            this.lbl_uname.Location = new System.Drawing.Point(166, 53);
-            this.lbl_uname.Name = "lbl_uname";
-            this.lbl_uname.Size = new System.Drawing.Size(0, 24);
-            this.lbl_uname.TabIndex = 2;
+            this.lbl_nick1.AutoSize = true;
+            this.lbl_nick1.Location = new System.Drawing.Point(30, 53);
+            this.lbl_nick1.Name = "lbl_nick1";
+            this.lbl_nick1.Size = new System.Drawing.Size(130, 24);
+            this.lbl_nick1.TabIndex = 0;
+            this.lbl_nick1.Text = "用户昵称：";
             // 
-            // pic_avatar
-            // 
-            this.pic_avatar.Location = new System.Drawing.Point(451, 27);
-            this.pic_avatar.Name = "pic_avatar";
-            this.pic_avatar.Size = new System.Drawing.Size(95, 80);
-            this.pic_avatar.TabIndex = 3;
-            this.pic_avatar.TabStop = false;
-            // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -113,8 +113,9 @@
             this.Controls.Add(this.grb_user);
             this.Controls.Add(this.grb_follow);
             this.Controls.Add(this.button2);
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "微商相册采集";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.grb_user.ResumeLayout(false);
             this.grb_user.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pic_avatar)).EndInit();
