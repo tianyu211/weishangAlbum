@@ -113,7 +113,9 @@ namespace Demo
         /// 获取关注的人
         /// </summary>
         private void GetAlbum()
-        { 
+        {
+            DTFollow = new DataTable();
+            BindDgvFollow(DTFollow);
             int page = 1;
             int residue = 1;        
             do

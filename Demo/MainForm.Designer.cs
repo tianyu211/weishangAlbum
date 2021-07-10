@@ -72,7 +72,7 @@
             this.grb_follow.Size = new System.Drawing.Size(1112, 591);
             this.grb_follow.TabIndex = 3;
             this.grb_follow.TabStop = false;
-            this.grb_follow.Text = "关注用户";
+            this.grb_follow.Text = "关注用户（双击用户查看商品）";
             // 
             // dgv_follows
             // 
